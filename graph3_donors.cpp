@@ -18,8 +18,8 @@ class Node{
 public:
   string              symbol;                  
 
-  long int            dollars;                              
-  list<long int>      dollars_list;                              
+  long long int            dollars;                              
+  list<long long int>      dollars_list;                              
 
   int                 number_donations;
   
@@ -37,7 +37,7 @@ public:
 
   
   Node(){dollars=0;number_donations=0;};
-  Node(string name, long int value ){symbol=name;dollars= value;number_donations=0;/*cout<<name<<" "<<value<<endl;*/}
+  Node(string name, long long int value ){symbol=name;dollars= value;number_donations=0;/*cout<<name<<" "<<value<<endl;*/}
 
 }; 
 
@@ -112,28 +112,29 @@ Node::output1( int depth, int tabs, list<string> head_nodes ){
 
   if (depth == 1 ) {
   
-  int size = symbol.size();  if (size>40) size=40;
+    int size = symbol.size();  if (size>60) size=60;
 
-  for (int i=0;i!=40-size;i++) cout<<" ";
-  cout<<"\t";
+    for (int i=0;i!=60-size;i++) cout<<" ";
+    cout<<"\t";
 
-  //cout<<number_donations<<"\t";
+    //cout<<number_donations<<"\t";
   
-  for  (int i=0;i!=12;i++) if (dollars<pow(10,i)) cout<<" ";
-  //cout << dollars ;
-  if (depth==1) cout << dollars ;
+    for  (int i=0;i!=12;i++) if (dollars<pow(10,i)) cout<<" ";
 
-  //cout<<"\t"<<dollars/number_donations;  //<<"\t"<<branches.size();
+    cout << dollars ;
+    //if (depth==1) cout << dollars ;
+
+    cout<<"\t"<<dollars/number_donations<<"\t"<<number_donations;   //<<"\t"<<branches.size();
   
-  list<long int>::iterator d = dollars_list.begin();
+    list<long long int>::iterator d = dollars_list.begin();
 
-  for ( ; d!=dollars_list.end(); d++){
+    for ( ; d!=dollars_list.end(); d++){
 
-    //cout<<"\t"<<*d;
-    if (depth==1) cout<<"\t"<<*d;
-  }
+      //cout<<"\t"<<*d;
+      if (depth==1) cout<<"\t"<<*d;
+    }
 
-  }  // depth==0
+  }  // depth==1
   
   cout << endl;
   
@@ -141,16 +142,16 @@ Node::output1( int depth, int tabs, list<string> head_nodes ){
 
       head_nodes.push_back(symbol);
     
-    multimap<long int,Node*>                    br_sort;
-    multimap<long int,Node*>::reverse_iterator  br;
+    multimap<long long int,Node*>                    br_sort;
+    multimap<long long int,Node*>::reverse_iterator  br;
 
     list<Node>::iterator s = branches.begin();
 
     int s1=0;
     for (;s!=branches.end();s++,s1++){
 
-      int d1=0;
-      int y1=0;
+      long long int d1=0;
+      long long int y1=0;
 
       /*
       if (s->dollars_list.size()>0){
@@ -179,7 +180,7 @@ Node::output1( int depth, int tabs, list<string> head_nodes ){
 
 
       //br_sort.insert(pair<long int,Node*>(s1, &(*s)));
-      br_sort.insert(pair<long int,Node*>(d1, &(*s)));
+      br_sort.insert(pair<long long int,Node*>(d1, &(*s)));
       //br_sort.insert(pair<long int,Node*>(d1+y1, &(*s)));
     }
     
@@ -220,7 +221,7 @@ Node::output( int depth, int tabs ){
   for  (int i=0;i!=12;i++) if (dollars<pow(10,i)) cout<<" ";
   cout << dollars ;
 
-  list<long int>::iterator d = dollars_list.begin();
+  list<long long int>::iterator d = dollars_list.begin();
 
   for ( ; d!=dollars_list.end(); d++){
 
@@ -393,7 +394,7 @@ int main()
 
   int dollars1 = 0;
   
-
+  long int total_dollars=0;
 
   // ------------------------------------ parse main data file
 
@@ -438,18 +439,28 @@ int main()
       if (num_commas==15){                                 // ------------  the $$$
 
 	dollars1   =           atoi(field.c_str());
+
+	total_dollars += dollars1;
+
 	//cout<<field<<"\t"<<dollars1<<endl;
       }
 
 
-      if (num_commas==13){                                 // ---------------  the day
+      if (num_commas==14){                                 // ---------------  the day
 	//cout<<field<<endl;
 
-	//year  = field.substr(0,4);
-	//month = field.substr(5,2);
-	//day   = field.substr(8,2);
+	if (field.size()==8){
+	  year  = field.substr(4,4);
+	  month = field.substr(0,2);
+	  day   = field.substr(2,2);
 	
-	//cout<<year<<" "<<month<<" "<<day<<endl;
+	  //cout<<year<<" "<<month<<" "<<day<<endl;
+
+	  field = month+"/"+day+"/"+year;
+
+	  fields.back() = field;
+	}
+	
       }
 
       
@@ -514,31 +525,21 @@ int main()
       symbols.push_back( *c1  );
       symbols.push_back( *f  );
 
-      //if (ccnt==0)  symbols.push_back(fields[5]);  //  type 
-      if (ccnt==0)  symbols.push_back(fields[11]);  //    employer2
-      //if (ccnt==0)  symbols.push_back(fields[7]);  //    employer2
+      if (ccnt==0)  symbols.push_back("NAME"); 
+      if (ccnt==0)  symbols.push_back(fields[7]);  
 
-      /*
-      if (ccnt==0) {                           //committee state city donor zip - nancy pelosi study
-	symbols.push_back(fields[15]);  //    
-	symbols.push_back(fields[9]);  //    
-	symbols.push_back(fields[8]);  //    
-	symbols.push_back(fields[7]);  //    
-	//symbols.push_back(fields[10]);  //    
+      //if (ccnt==0)  symbols.push_back("TRANSACTION_DT"); 
+      //if (ccnt==0)  symbols.push_back(fields[13]);  
 
-      }
-      */
-      
-      /*
-      if (ccnt==0)  symbols.push_back(fields[5]);  // 
-      if (ccnt==0)  symbols.push_back(fields[15]);  // 
-      if (ccnt==0)  symbols.push_back(fields[7]);  //
-      if (ccnt==0)  symbols.push_back(fields[1]);  //
-      */
+      //if (ccnt==0)  symbols.push_back("TRANSACTION_AMT"); 
+      //if (ccnt==0)  symbols.push_back(fields[14]);  
+
+
+
+     if (ccnt==7)  symbols.push_back("CMTE_ID");  
+     if (ccnt==7)  symbols.push_back(fields[0]);  
 
       
-      //if (ccnt==7)  symbols.push_back(fields[0]);  // name - committee id  // - slow  - nancy p study
-
       //if (ccnt==15) symbols.push_back(fields[0]);  // other - committee id
 
       
@@ -549,8 +550,11 @@ int main()
       //if (ccnt==0){
       
 	//column_graph.input( s, 1 );
-      
-	column_graph.input( s, dollars1 );
+
+	//if (ccnt==0 && fields[0]=="ACTBLUE")
+	  //if (ccnt==0 && fields[0]=="WINRED")
+	//if (ccnt==0 || ccnt==15)
+	  column_graph.input( s, dollars1 );
        }
 
     }
@@ -560,8 +564,20 @@ int main()
   }
   // ------------------------------------ parse main data file
 
-  cout<<num_lines<<endl;
 
+  
+  cout<<endl<<"total donated1\t\t"<< total_dollars<<endl;
+
+  cout<<"average donation\t"<<total_dollars/num_lines<<endl;
+
+  cout<<"number donations\t"<<num_lines<<endl<<endl;
+
+
+
+    
+
+
+  
 
 
   // -----------------------------------  print out data graph   
@@ -572,24 +588,50 @@ int main()
 
   list<Node>::iterator b =column_graph.branches.begin();
   for (               ;b!=column_graph.branches.end();b++){
+
+    cout<<"--- "<<b->symbol;
+    if (b->symbol.size()<12) cout<<"\t";
+
+    cout<<"\t #unique= "<<b->branches.size()<<endl; 
+    
+  }
+
+  
+
+    
+  b =column_graph.branches.begin();
+  for (               ;b!=column_graph.branches.end();b++){
     //if ( ii==0 ){    // donation target
     //if (  ii == 11){    // donator
 
-      cout<<endl<<"--- ";   
+    cout<<endl<<"--- ";    //<<b->branches.size()<<" ";   
       b->output1(2,0, s_e);
 
-      /*
-      if (b->symbol=="NAME"){                // name - committee id
-	cout<<endl<<"--- ";   
-	b->output1(3,0, s_e);
+
+      if (b->symbol=="TRANSACTION_DT"){              
+	//cout<<endl<<"--- ";   
+	//b->output1(3,0, s_e);
       }
 
-      */
+
       
       if (b->symbol=="CMTE_ID"){                
-	cout<<endl<<"--- ";   
-	b->output1(3,0, s_e);
+	//cout<<endl<<"--- ";   
+	//b->output1(3,0, s_e);
       }
+
+      if (b->symbol=="CMTE_ID"){                
+	cout<<endl<<"--- ";   
+	b->output1(4,0, s_e);
+      }
+
+      if (b->symbol=="NAME"){                
+	cout<<endl<<"--- ";   
+	b->output1(4,0, s_e);
+      }
+
+ 
+
       
       /*
  
@@ -614,14 +656,26 @@ int main()
 	cout<<endl<<"--- ";   
 	b->output1(6,0, s_e);
       }
-      */
-      
-     /*      
+
+      */     
+
       if (b->symbol=="OTHER_ID"){                // committee id - name
 	cout<<endl<<"--- ";   
 	b->output1(3,0, s_e);
       }
+ 
+      
+     /*      
+
+      if (b->symbol=="EMPLOYER"){                // employer
+	cout<<endl<<"--- ";   
+	b->output1(3,0, s_e);
+      }
+
       */
+
+
+
   }
 
       
