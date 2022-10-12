@@ -28,6 +28,7 @@ public:
 
 
   void   input        (list<string>::iterator sym, long int amount);
+  void   input        (list<string>::iterator sym, long int amount, long int number_donations);
 
   void   output       ( int  depth,  int tabs );
   void   output1      ( int  depth,  int tabs, list<string> head_nodes );
@@ -67,6 +68,40 @@ Node::roll_dollars( int depth){
 }
 
 
+
+//----------------------------------------
+//
+void
+Node::input( list<string>::iterator symbol, long int amount, long int number ){
+
+  //cout<< *symbol<<endl;
+
+    dollars += amount;
+
+    number_donations += number;
+    
+  if (*symbol=="-stop") return;
+
+  
+  map< string, Node*>::iterator sn = branches_map.find(*symbol);
+
+   if (sn == branches_map.end()){
+    
+    Node temp(*symbol, 0 );
+
+    branches.push_back(temp);
+
+    branches_map.insert( pair<string,Node*>(*symbol,&(branches.back() )));
+    
+    sn = branches_map.find(*symbol);
+  }
+
+
+   //sn->second->dollars += amount;
+
+   sn->second->input( ++symbol, amount, number );
+    
+}
 
 //----------------------------------------
 //
@@ -124,6 +159,8 @@ Node::output1( int depth, int tabs, list<string> head_nodes ){
     cout << dollars ;
     //if (depth==1) cout << dollars ;
 
+    if (number_donations==0) number_donations=-1;
+    
     cout<<"\t"<<dollars/number_donations<<"\t"<<number_donations;   //<<"\t"<<branches.size();
   
     list<long long int>::iterator d = dollars_list.begin();
@@ -256,7 +293,7 @@ Node::output( int depth, int tabs ){
 
 //----------------------------------------
 //
-int main()
+int main1()
 {
 
   string this_year  = "2007";
@@ -311,7 +348,7 @@ int main()
     
   }
 
-  cout<<"number of committess "<<cm_map.size()<<endl;
+  cout<<"number of committees "<<cm_map.size()<<endl;
     
   // ----- parse committee_master file
 
@@ -456,7 +493,8 @@ int main()
 	
 	  //cout<<year<<" "<<month<<" "<<day<<endl;
 
-	  field = month+"/"+day+"/"+year;
+	  //field = month+"/"+day+"/"+year;
+	  field = month+"/"+year;
 
 	  fields.back() = field;
 	}
@@ -525,8 +563,8 @@ int main()
       symbols.push_back( *c1  );
       symbols.push_back( *f  );
 
-      if (ccnt==0)  symbols.push_back("NAME"); 
-      if (ccnt==0)  symbols.push_back(fields[7]);  
+      //if (ccnt==0)  symbols.push_back("NAME"); 
+      //if (ccnt==0)  symbols.push_back(fields[7]);  
 
       //if (ccnt==0)  symbols.push_back("TRANSACTION_DT"); 
       //if (ccnt==0)  symbols.push_back(fields[13]);  
@@ -536,8 +574,8 @@ int main()
 
 
 
-     if (ccnt==7)  symbols.push_back("CMTE_ID");  
-     if (ccnt==7)  symbols.push_back(fields[0]);  
+      //if (ccnt==13)  symbols.push_back("CMTE_ID");  
+      //if (ccnt==13)  symbols.push_back(fields[0]);  
 
       
       //if (ccnt==15) symbols.push_back(fields[0]);  // other - committee id
@@ -592,7 +630,7 @@ int main()
     cout<<"--- "<<b->symbol;
     if (b->symbol.size()<12) cout<<"\t";
 
-    cout<<"\t #unique= "<<b->branches.size()<<endl; 
+    cout<<"\t #unique=\t"<<b->branches.size()<<endl; 
     
   }
 
@@ -607,10 +645,11 @@ int main()
     cout<<endl<<"--- ";    //<<b->branches.size()<<" ";   
       b->output1(2,0, s_e);
 
+      /*
 
       if (b->symbol=="TRANSACTION_DT"){              
 	//cout<<endl<<"--- ";   
-	//b->output1(3,0, s_e);
+	//b->output1(4,0, s_e);
       }
 
 
@@ -626,14 +665,14 @@ int main()
       }
 
       if (b->symbol=="NAME"){                
-	cout<<endl<<"--- ";   
-	b->output1(4,0, s_e);
+	//cout<<endl<<"--- ";   
+	//b->output1(4,0, s_e);
       }
 
  
 
       
-      /*
+
  
       if (b->symbol=="CMTE_ID"){                // committee id - name
 	cout<<endl<<"--- ";   
@@ -660,8 +699,8 @@ int main()
       */     
 
       if (b->symbol=="OTHER_ID"){                // committee id - name
-	cout<<endl<<"--- ";   
-	b->output1(3,0, s_e);
+	//cout<<endl<<"--- ";   
+	//b->output1(3,0, s_e);
       }
  
       
@@ -681,9 +720,165 @@ int main()
       
       //}      
     ii++;
-  }
+
+    return 0;
+}
 
 // -----------------------------------  print out data graph    
 
 
 
+
+//----------------------------------------
+//
+int main2()
+{
+
+
+  string         line;
+  string         field;
+
+  int            s1=0;
+  int            s2=0;
+
+  int            first =0;
+  int            count=0;
+
+  Node graph0("fields",0);
+
+  
+  
+
+  //----------------------------------------- read the data
+
+    
+  while (getline(cin, line)){
+
+    if (first==1 || line =="-first") {
+
+      first=0;
+    
+      for (int i = 0;i!=44;i++){     // skip first 44 output lines in fec*.txt files
+	getline(cin,line);
+      
+      }      
+    }
+
+    //cout<<line<<endl;
+
+    if (line =="-roll" ){
+
+      graph0.roll_dollars(6);
+      cout<<"rolling"<<endl;
+
+      first=1;
+
+      continue;
+    }
+    
+    count++;
+
+    if ( isdigit( line.c_str()[0] )) {
+
+      //cout<<line<<endl;
+
+      int count1 = atoi(line.substr(0,1).c_str());
+
+      count1 = (count1+1)*2;
+
+      int    s1      =0;
+      int    s2      =0;
+      string field;
+      list<string>             symbols;
+      list<string>::iterator   s;
+
+      
+      s2=line.find("\t", s1); s1+=s2-s1+1;     // skip first field
+     
+      for (int i=0; i!= count1; i++){
+
+	s2=line.find("\t", s1);field=line.substr(s1,s2-s1); s1+=s2-s1+1;  	
+
+	//remove padding whistespace
+
+	int last_not_space = 0;
+	
+	int ii =0;
+	
+	for ( ;ii< field.length(); ++ii ){
+
+	  if (field[ii] != ' ') last_not_space = ii;
+	  
+	}
+
+	string field1 = field.substr(0, last_not_space+1);
+	
+    
+	
+	symbols.push_back(field1);
+      }
+      
+      symbols.push_back("-stop");
+
+      s2=line.find("\t", s1);field=line.substr(s1,s2-s1); s1+=s2-s1+1;
+      long long int  dollars = atol (field.c_str());
+
+      s2=line.find("\t", s1);field=line.substr(s1,s2-s1); s1+=s2-s1+1;
+      long long int  average = atol (field.c_str());
+
+      s2=line.find("\t", s1);field=line.substr(s1,s2-s1); s1+=s2-s1+1;
+      long long int  number_donations = atol (field.c_str());
+
+
+	s=symbols.begin();
+      	graph0.input( s, dollars, number_donations);
+
+      
+    } 
+ 
+  }
+
+  //cout<<count<<endl;
+
+  //cout<<graph0.branches.size()<<endl;
+
+  list<Node>::iterator b =graph0.branches.begin();
+  for (               ;b!=graph0.branches.end();b++){
+
+    cout<<"--- "<<b->symbol;
+    if (b->symbol.size()<12) cout<<"\t";
+
+    cout<<"\t #unique=\t"<<b->branches.size()<<endl; 
+    
+  }
+
+
+
+
+   list<string> s_e;
+   
+  b =graph0.branches.begin();
+  for (               ;b!=graph0.branches.end();b++){
+
+
+    cout<<endl<<"--- ";    //<<b->branches.size()<<" ";   
+      b->output1(2,0, s_e);
+
+  }
+
+
+
+
+  
+ return 0;
+}
+
+//----------------------------------------
+//
+int main()
+{
+
+  //main1();
+  main2();
+
+}
